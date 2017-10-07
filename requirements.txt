@@ -1,0 +1,3 @@
+--extra-index-url http://archive.panda3d.org/simple
+panda3d>=1.10.0.dev1182
+pyopengl
