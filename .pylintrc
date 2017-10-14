@@ -306,7 +306,7 @@ dummy-variables-rgx=(_+[a-zA-Z0-9]*?$)|dummy
 
 # List of additional names supposed to be defined in builtins. Remember that
 # you should avoid to define new builtins when possible.
-additional-builtins=globalClock,taskMgr
+additional-builtins=globalClock,taskMgr,base
 
 # List of strings which can identify a callback function by name. A callback
 # name must start or end with one of those strings.
