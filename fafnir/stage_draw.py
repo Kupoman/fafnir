@@ -47,6 +47,9 @@ class StageDraw:
         self.callback_np.set_shader_input('buffer_vertices', self.data.buffer_vertices)
         self.callback_np.set_shader_input('buffer_materials', self.data.buffer_materials)
         self.callback_np.set_depth_test(False)
+        light_node_paths = self.data.np_scene_root.find_all_matches('**/+LightLensNode')
+        for light_np in light_node_paths:
+            self.callback_np.set_light(light_np)
         self.callback_np.hide(self.data.mask_rtt)
 
     def disable(self):
