@@ -45,6 +45,7 @@ class StageDraw:
         self.callback_np.set_shader_input('texture_intersections', self.data.texture_intersections)
         self.callback_np.set_shader_input('buffer_primitives', self.data.buffer_primitives)
         self.callback_np.set_shader_input('buffer_vertices', self.data.buffer_vertices)
+        self.callback_np.set_shader_input('buffer_materials', self.data.buffer_materials)
         self.callback_np.set_depth_test(False)
         self.callback_np.hide(self.data.mask_rtt)
 

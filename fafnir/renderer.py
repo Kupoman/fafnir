@@ -20,7 +20,7 @@ class Renderer:
             StageGather(self.data),
             StageDraw(self.data),
         ]
-        self.enable_stages(0)
+        self.enable_stages(2)
         self.enable_debug_bindings()
 
         # Hook into task manager
