@@ -37,8 +37,7 @@ class StageGather:
         self.shader_saved = self.data.np_scene_root.get_shader()
         self.data.np_scene_root.set_shader(self.shader_gather)
 
-        self.data.np_scene_root.set_shader_input('buffer_vertices', self.data.buffer_vertices)
-        self.data.np_scene_root.set_shader_input('buffer_primitives', self.data.buffer_primitives)
+        self.data.np_scene_root.set_shader_input('material_index', 0)
 
         # Setup RTT
         fb_prop = p3d.FrameBufferProperties()

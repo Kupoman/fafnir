@@ -1,15 +1,14 @@
-#version 420
+#version 330
 
+/*
 uniform samplerBuffer buffer_vertices;
 uniform isamplerBuffer buffer_primitives;
 uniform samplerBuffer buffer_materials;
-uniform sampler2D texture_intersections;
 
 uniform mat4 p3d_ViewMatrix;
 uniform mat3 p3d_NormalMatrix;
 
 flat in int instance_id;
-out vec4 frag_out;
 
 struct {
     vec4 ambient;
@@ -93,9 +92,19 @@ void fafnir_unpack_material()
 uniform struct p3d_LightSourceParameters {
     vec4 position;
 } p3d_LightSource[8];
+*/
+
+uniform sampler2D texture_intersections;
+out vec4 frag_out;
 
 void main()
 {
+    ivec2 texel_pos = ivec2(gl_FragCoord.xy);
+    vec4 data = texelFetch(texture_intersections, texel_pos, 0);
+    frag_out.rgb = data.xyz;
+    frag_out.a = 1.0;
+
+    /*
     fafnir_unpack_fragment();
     fafnir_unpack_material();
 
@@ -113,4 +122,5 @@ void main()
     frag_out.rgb = diffuse + specular;
 
     frag_out.w = 1.0;
+    */
 }
