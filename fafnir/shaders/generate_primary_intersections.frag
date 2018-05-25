@@ -1,11 +1,9 @@
 #version 330
 
-uniform int material_index;
 
 in VertexData {
     vec4 barycoord;
-    vec4 vertex;
-    vec3 normal;
+    flat float material_index;
 };
 
 out vec4 out_data;

@@ -17,8 +17,12 @@ class StageGather:
         self.shader_gather = p3d.Shader.load(
             p3d.Shader.SL_GLSL,
             vertex='shaders/build_mesh_cache.vert',
-            geometry='shaders/build_mesh_cache.geom',
-            fragment='shaders/generate_primary_intersections.frag'
+            fragment='shaders/debug.frag',
+        )
+        self.shader_primary_rays = p3d.Shader.load(
+            p3d.Shader.SL_GLSL,
+            vertex='shaders/generate_primary_intersections.vert',
+            fragment='shaders/generate_primary_intersections.frag',
         )
         self.shader_saved = None
 
@@ -45,6 +49,7 @@ class StageGather:
         def begin_callback(callback_data):
             buffer_id = self.data.buffer_meshes.get_buffer_id()
             if buffer_id and not self.xfb_active:
+                gl.glEnable(gl.GL_RASTERIZER_DISCARD)
                 gl.glBindBufferBase(gl.GL_TRANSFORM_FEEDBACK_BUFFER, 0, buffer_id)
                 gl.glBeginTransformFeedback(gl.GL_TRIANGLES)
                 self.xfb_active = True
@@ -55,6 +60,7 @@ class StageGather:
             if self.xfb_active:
                 gl.glEndTransformFeedback()
                 gl.glBindBufferBase(gl.GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0)
+                gl.glDisable(gl.GL_RASTERIZER_DISCARD)
                 self.xfb_active = False
             callback_data.upcall()
 
@@ -71,12 +77,24 @@ class StageGather:
             path.set_shader_input('material_index', 0)
             path.hide(self.data.mask_draw)
 
+    def setup_primary_rays(self):
+        def ray_callback(callback_data):
+            gl.glDrawTransformFeedback(gl.GL_TRIANGLES, 0)
+            callback_data.upcall()
+
+        ray_path = attach_new_callback_node(self.data.np_render, 'Primary Rays', ray_callback)
+        ray_path.set_bin('xfb_end', 20)
+        ray_path.set_shader(self.shader_primary_rays)
+        ray_path.set_shader_input('buffer_meshes', self.data.buffer_meshes.get_texture())
+        ray_path.hide(self.data.mask_draw)
+
     def enable(self):
         if self.is_enabled:
             return
         self.is_enabled = True
 
         self.setup_xfb()
+        self.setup_primary_rays()
 
         self.data.np_scene_root.set_attrib(self.color_blend_attrib)
         self.data.np_scene_root.set_attrib(self.transparency_attrib)
