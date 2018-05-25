@@ -1,4 +1,12 @@
 import panda3d.core as p3d
+from OpenGL import GL as gl
+
+
+def attach_new_callback_node(nodepath, name, callback):
+    cb_node = p3d.CallbackNode(name)
+    cb_node.set_draw_callback(p3d.PythonCallbackObject(callback))
+    cb_node_path = nodepath.attach_new_node(cb_node)
+    return cb_node_path
 
 
 class StageGather:
@@ -26,10 +34,49 @@ class StageGather:
         self.transparency_attrib = p3d.TransparencyAttrib.make(p3d.TransparencyAttrib.M_none)
         self.alpha_test_attrib = p3d.AlphaTestAttrib.make(p3d.AlphaTestAttrib.M_none, 1.0)
 
+        self.xfb_cb_paths = []
+        self.xfb_active = False
+
+    def setup_xfb(self):
+        bin_manager = p3d.CullBinManager.get_global_ptr()
+        bin_manager.add_bin('xfb_begin', p3d.CullBinManager.BT_fixed, 5)
+        bin_manager.add_bin('xfb_end', p3d.CullBinManager.BT_fixed, 55)
+
+        def begin_callback(callback_data):
+            buffer_id = self.data.buffer_meshes.get_buffer_id()
+            if buffer_id and not self.xfb_active:
+                gl.glBindBufferBase(gl.GL_TRANSFORM_FEEDBACK_BUFFER, 0, buffer_id)
+                gl.glBeginTransformFeedback(gl.GL_TRIANGLES)
+                self.xfb_active = True
+
+            callback_data.upcall()
+
+        def end_callback(callback_data):
+            if self.xfb_active:
+                gl.glEndTransformFeedback()
+                gl.glBindBufferBase(gl.GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0)
+                self.xfb_active = False
+            callback_data.upcall()
+
+        begin_path = attach_new_callback_node(self.data.np_render, 'Begin XFB', begin_callback)
+        begin_path.set_bin('xfb_begin', 10)
+
+        end_path = attach_new_callback_node(self.data.np_render, 'End XFB', end_callback)
+        end_path.set_bin('xfb_end', 10)
+
+        self.xfb_cb_paths = (begin_path, end_path)
+        for path in self.xfb_cb_paths:
+            path.set_shader(self.shader_gather)
+            path.set_shader_input('primitive_offset', 0)
+            path.set_shader_input('material_index', 0)
+            path.hide(self.data.mask_draw)
+
     def enable(self):
         if self.is_enabled:
             return
         self.is_enabled = True
+
+        self.setup_xfb()
 
         self.data.np_scene_root.set_attrib(self.color_blend_attrib)
         self.data.np_scene_root.set_attrib(self.transparency_attrib)
@@ -74,6 +121,9 @@ class StageGather:
         if not self.is_enabled:
             return
         self.is_enabled = False
+
+        for cb_path in self.xfb_cb_paths:
+            cb_path.remove_node()
 
         if self.shader_saved:
             self.data.np_scene_root.set_shader(self.shader_saved)

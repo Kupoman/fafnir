@@ -1,9 +1,8 @@
 #version 330
 
-/*
-uniform samplerBuffer buffer_vertices;
-uniform isamplerBuffer buffer_primitives;
+uniform samplerBuffer buffer_meshes;
 uniform samplerBuffer buffer_materials;
+/*
 
 uniform mat4 p3d_ViewMatrix;
 uniform mat3 p3d_NormalMatrix;
@@ -51,7 +50,7 @@ void fafnir_unpack_fragment()
     int v2_idx = texelFetch(buffer_primitives, int(primid+2)).x;
     vec4 v2_data0 = texelFetch(buffer_vertices, int(v2_idx)).bgra;
 
-    p3d_Vertex += uvw.x * vec4(v0_data0.xyz, 0.0);
+    p3d_vertex += uvw.x * vec4(v0_data0.xyz, 0.0);
     p3d_Vertex += uvw.y * vec4(v1_data0.xyz, 0.0);
     p3d_Vertex += uvw.z * vec4(v2_data0.xyz, 0.0);
 
@@ -101,7 +100,19 @@ void main()
 {
     ivec2 texel_pos = ivec2(gl_FragCoord.xy);
     vec4 data = texelFetch(texture_intersections, texel_pos, 0);
-    frag_out.rgb = data.xyz;
+    vec3 uvw = vec3(data.xy, 1.0 - data.x - data.y);
+
+    int vertexIdBase = int(data.z * 3);
+    vec3 v0 = texelFetch(buffer_meshes, vertexIdBase + 0).xyz;
+    vec3 v1 = texelFetch(buffer_meshes, vertexIdBase + 1).xyz;
+    vec3 v2 = texelFetch(buffer_meshes, vertexIdBase + 2).xyz;
+
+    vec3 vertex = vec3(0.0);
+    vertex += uvw.x * v0;
+    vertex += uvw.y * v1;
+    vertex += uvw.z * v2;
+
+    frag_out.rgb = vertex;
     frag_out.a = 1.0;
 
     /*

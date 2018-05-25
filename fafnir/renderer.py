@@ -29,6 +29,9 @@ class Renderer:
             return task.cont
         taskMgr.add(task_update, 'Fafnir update')
 
+    def display_buffer(self):
+        self.data.buffer_meshes.print_buffer(4)
+
     def enable_debug_bindings(self):
         base.bufferViewer.setPosition("llcorner")
         base.bufferViewer.setCardSize(0, 0.40)
@@ -38,6 +41,7 @@ class Renderer:
         def debug_dump():
             print(base.render.ls())
         base.accept('f2', debug_dump)
+        base.accept('f3', self.display_buffer)
 
         for i in range(len(self.stages) + 1):
             base.accept(str(i), self.enable_stages, [i])
