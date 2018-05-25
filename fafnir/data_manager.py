@@ -24,6 +24,7 @@ class DataManager:
         self.texture_material_ids = p3d.Texture()
 
         # Buffers
+        self.vertex_stride = 2
         self.buffer_meshes = GpuBuffer('mesh_buffer', 0, p3d.Texture.T_float, p3d.Texture.F_rgba32)
         self.buffer_materials = p3d.Texture()
 
@@ -92,4 +93,4 @@ class DataManager:
         if primitive_count > self.primitive_count:
             print('Setting primitive_count to', primitive_count)
             self.primitive_count = primitive_count
-            self.buffer_meshes.resize(self.primitive_count * 3)
+            self.buffer_meshes.resize(self.primitive_count * 3 * self.vertex_stride)

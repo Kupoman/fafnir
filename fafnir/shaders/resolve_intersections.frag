@@ -2,12 +2,9 @@
 
 uniform samplerBuffer buffer_meshes;
 uniform samplerBuffer buffer_materials;
-/*
 
-uniform mat4 p3d_ViewMatrix;
-uniform mat3 p3d_NormalMatrix;
-
-flat in int instance_id;
+vec4 p3d_Vertex = vec4(0.0);
+vec3 p3d_Normal = vec3(0.0);
 
 struct {
     vec4 ambient;
@@ -17,8 +14,13 @@ struct {
     float shininess;
 } p3d_Material;
 
-vec4 p3d_Vertex = vec4(0.0);
-vec3 p3d_Normal = vec3(0.0);
+/*
+
+uniform mat4 p3d_ViewMatrix;
+uniform mat3 p3d_NormalMatrix;
+
+flat in int instance_id;
+
 vec4 p3d_Color = vec4(0.0);
 vec2 p3d_MultiTexCoord0 = vec2(0.0);
 vec2 p3d_MultiTexCoord1 = vec2(0.0);
@@ -87,38 +89,51 @@ void fafnir_unpack_material()
     p3d_Material.specular = specular_data.xyz;
     p3d_Material.shininess = specular_data.w;
 }
+*/
 
 uniform struct p3d_LightSourceParameters {
     vec4 position;
 } p3d_LightSource[8];
-*/
 
 uniform sampler2D texture_intersections;
 out vec4 frag_out;
 
-void main()
+vec3 bary_interp_vec3(vec3 a, vec3 b, vec3 c, vec3 uvw)
+{
+    vec3 final = vec3(0.0);
+    final += uvw.x * a;
+    final += uvw.y * b;
+    final += uvw.z * c;
+    return final;
+}
+
+void fafnir_unpack_vertex()
 {
     ivec2 texel_pos = ivec2(gl_FragCoord.xy);
     vec4 data = texelFetch(texture_intersections, texel_pos, 0);
     vec3 uvw = vec3(data.xy, 1.0 - data.x - data.y);
 
-    int vertexIdBase = int(data.z * 3);
+    int vertexStride = 2;
+    int vertexIdBase = int(data.z * 3 * vertexStride);
     vec3 v0 = texelFetch(buffer_meshes, vertexIdBase + 0).xyz;
-    vec3 v1 = texelFetch(buffer_meshes, vertexIdBase + 1).xyz;
-    vec3 v2 = texelFetch(buffer_meshes, vertexIdBase + 2).xyz;
+    vec3 n0 = texelFetch(buffer_meshes, vertexIdBase + 1).xyz;
+    vec3 v1 = texelFetch(buffer_meshes, vertexIdBase + 2).xyz;
+    vec3 n1 = texelFetch(buffer_meshes, vertexIdBase + 3).xyz;
+    vec3 v2 = texelFetch(buffer_meshes, vertexIdBase + 4).xyz;
+    vec3 n2 = texelFetch(buffer_meshes, vertexIdBase + 5).xyz;
 
-    vec3 vertex = vec3(0.0);
-    vertex += uvw.x * v0;
-    vertex += uvw.y * v1;
-    vertex += uvw.z * v2;
 
-    frag_out.rgb = vertex;
-    frag_out.a = 1.0;
+    p3d_Vertex = vec4(bary_interp_vec3(v0, v1, v2, uvw), 1.0);
+    p3d_Normal = bary_interp_vec3(n0, n1, n2, uvw);
+}
 
-    /*
-    fafnir_unpack_fragment();
-    fafnir_unpack_material();
+void main()
+{
+    p3d_Material.diffuse = vec4(0.7, 0.0, 0.0, 1.0);
+    p3d_Material.specular = vec3(0.0, 0.7, 0.7);
+    p3d_Material.shininess = 20;
 
+    fafnir_unpack_vertex();
     vec3 light_pos = p3d_LightSource[0].position.xyz;
     vec3 V = normalize(-p3d_Vertex.xyz);
     vec3 N = p3d_Normal;
@@ -131,7 +146,5 @@ void main()
     vec3 specular = max(pow(NoH, p3d_Material.shininess), 0.0) * p3d_Material.specular.rgb;
 
     frag_out.rgb = diffuse + specular;
-
     frag_out.w = 1.0;
-    */
 }

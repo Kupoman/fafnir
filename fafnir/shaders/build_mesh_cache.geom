@@ -13,10 +13,11 @@ in VertexData {
     vec3 normal;
 } v_in[];
 
-layout(xfb_buffer=0, xfb_stride=16) out;
+layout(xfb_buffer=0, xfb_stride=32) out;
 out VertexData {
     vec4 barycoord;
     layout(xfb_offset=0) vec4 vertex;
+    layout(xfb_offset=16) vec3 normal;
 };
 
 void main()
@@ -26,6 +27,7 @@ void main()
         gl_PrimitiveID = primitive_offset + gl_PrimitiveIDIn;
         barycoord = vec4(i==0, i==1, i==2, 1.0);
         vertex = v_in[i].vertex;
+        normal = v_in[i].normal;
         EmitVertex();
     }
 }
