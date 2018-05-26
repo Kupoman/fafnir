@@ -40,6 +40,7 @@ class StageGather:
 
         self.xfb_cb_paths = []
         self.xfb_active = False
+        self.ray_path = None
 
     def setup_xfb(self):
         bin_manager = p3d.CullBinManager.get_global_ptr()
@@ -82,11 +83,11 @@ class StageGather:
             gl.glDrawTransformFeedback(gl.GL_TRIANGLES, 0)
             callback_data.upcall()
 
-        ray_path = attach_new_callback_node(self.data.np_render, 'Primary Rays', ray_callback)
-        ray_path.set_bin('xfb_end', 20)
-        ray_path.set_shader(self.shader_primary_rays)
-        ray_path.set_shader_input('buffer_meshes', self.data.buffer_meshes.get_texture())
-        ray_path.hide(self.data.mask_draw)
+        self.ray_path = attach_new_callback_node(self.data.np_render, 'Primary Rays', ray_callback)
+        self.ray_path.set_bin('xfb_end', 20)
+        self.ray_path.set_shader(self.shader_primary_rays)
+        self.ray_path.set_shader_input('buffer_meshes', self.data.buffer_meshes.get_texture())
+        self.ray_path.hide(self.data.mask_draw)
 
     def enable(self):
         if self.is_enabled:
@@ -142,6 +143,9 @@ class StageGather:
 
         for cb_path in self.xfb_cb_paths:
             cb_path.remove_node()
+
+        if self.ray_path:
+            self.ray_path.remove_node()
 
         if self.shader_saved:
             self.data.np_scene_root.set_shader(self.shader_saved)
