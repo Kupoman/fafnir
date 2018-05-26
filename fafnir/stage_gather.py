@@ -89,23 +89,7 @@ class StageGather:
         self.ray_path.set_shader_input('buffer_meshes', self.data.buffer_meshes.get_texture())
         self.ray_path.hide(self.data.mask_draw)
 
-    def enable(self):
-        if self.is_enabled:
-            return
-        self.is_enabled = True
-
-        self.setup_xfb()
-        self.setup_primary_rays()
-
-        self.data.np_scene_root.set_attrib(self.color_blend_attrib)
-        self.data.np_scene_root.set_attrib(self.transparency_attrib)
-        self.data.np_scene_root.set_attrib(self.alpha_test_attrib)
-        self.shader_saved = self.data.np_scene_root.get_shader()
-        self.data.np_scene_root.set_shader(self.shader_gather)
-
-        self.data.np_scene_root.set_shader_input('material_index', 0)
-
-        # Setup RTT
+    def setup_render_target(self):
         fb_prop = p3d.FrameBufferProperties()
         fb_prop.set_rgba_bits(32, 32, 32, 32)
         fb_prop.set_float_color(True)
@@ -134,6 +118,25 @@ class StageGather:
         )
         self.camera.reparent_to(self.data.np_scene_root)
         self.camera.node().get_display_region(0).set_sort(1)
+
+
+    def enable(self):
+        if self.is_enabled:
+            return
+        self.is_enabled = True
+
+        self.setup_xfb()
+        self.setup_primary_rays()
+
+        self.data.np_scene_root.set_attrib(self.color_blend_attrib)
+        self.data.np_scene_root.set_attrib(self.transparency_attrib)
+        self.data.np_scene_root.set_attrib(self.alpha_test_attrib)
+        self.shader_saved = self.data.np_scene_root.get_shader()
+        self.data.np_scene_root.set_shader(self.shader_gather)
+
+        self.data.np_scene_root.set_shader_input('material_index', 0)
+
+        self.setup_render_target()
         self.data.np_scene_root.hide(self.data.mask_draw)
 
     def disable(self):
