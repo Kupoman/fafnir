@@ -12,7 +12,6 @@ class DataManager:
 
         self.geom_node_paths = []
 
-        self.window_size = [0, 0]
         self.primitive_count = 0
         self.material_count = 0
 
@@ -35,8 +34,6 @@ class DataManager:
         self.update()
 
     def update(self):
-        self.window_size = [base.win.get_x_size(), base.win.get_y_size()]
-
         materials = self.np_scene_root.find_all_materials()
         material_count = materials.get_num_materials()
         if material_count > self.material_count:

@@ -94,7 +94,8 @@ class StageGather:
         fb_prop.set_rgba_bits(32, 32, 32, 32)
         fb_prop.set_float_color(True)
         fb_prop.set_depth_bits(32)
-        win_prop = p3d.WindowProperties().size(*self.data.window_size)
+        window_size = [base.win.get_x_size(), base.win.get_y_size()]
+        win_prop = p3d.WindowProperties().size(*window_size)
         self.rtt_buffer = base.graphics_engine.make_output(
             base.pipe,
             'Fafnir Gather Stage RTT',
@@ -174,4 +175,3 @@ class StageGather:
                 print('{} has no material'.format(nodepath.getName()))
                 material_index = 0
             nodepath.set_shader_input('material_index', material_index)
-            nodepath.set_shader_input('window_width', self.data.window_size[0])
