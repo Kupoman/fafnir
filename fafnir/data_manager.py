@@ -33,7 +33,7 @@ class DataManager:
 
         self.update()
 
-    def update(self):
+    def update_materials(self):
         materials = self.np_scene_root.find_all_materials()
         material_count = materials.get_num_materials()
         if material_count > self.material_count:
@@ -76,6 +76,7 @@ class DataManager:
 
         self.material_map = {material.name: i for i, material in enumerate(materials)}
 
+    def update_primitives(self):
         self.geom_node_paths = list(self.np_scene_root.find_all_matches('**/+GeomNode'))
 
         primitive_count = 0
@@ -91,3 +92,7 @@ class DataManager:
             print('Setting primitive_count to', primitive_count)
             self.primitive_count = primitive_count
             self.buffer_meshes.resize(self.primitive_count * 3 * self.vertex_stride)
+
+    def update(self):
+        self.update_materials()
+        self.update_primitives()
