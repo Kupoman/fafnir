@@ -1,8 +1,15 @@
 import ctypes
+import struct
 
 import panda3d.core as p3d
+from OpenGL.error import GLError
+from OpenGL.GL.ARB import bindless_texture as gl_bindless_texture
+from OpenGL import GL as gl
 
 from .gpu_buffer import GpuBuffer
+
+def int_bits_to_float(value):
+    return struct.unpack('f', struct.pack('I', value))[0]
 
 
 class DataManager:
@@ -14,16 +21,14 @@ class DataManager:
 
         self.primitive_count = 0
         self.material_count = 0
-
-        # Materials
-        self.material_map = {}
+        self.bindless_handles = {}
 
         # Textures
         self.texture_intersections = p3d.Texture()
         self.texture_material_ids = p3d.Texture()
 
         # Buffers
-        self.vertex_stride = 2
+        self.vertex_stride = 4
         self.buffer_meshes = GpuBuffer('mesh_buffer', 0, p3d.Texture.T_float, p3d.Texture.F_rgba32)
         self.buffer_materials = p3d.Texture()
 
@@ -33,21 +38,31 @@ class DataManager:
 
         self.update()
 
+    def get_texture_id(self, texture):
+        gsg = base.win.get_gsg()
+        pgo = gsg.get_prepared_objects()
+        texture.prepare(pgo)
+        context = texture.prepare_now(0, pgo, gsg)
+        return context.get_native_id()
+
     def update_materials(self):
-        materials = self.np_scene_root.find_all_materials()
-        material_count = materials.get_num_materials()
+        texel_count = 5
+        material_count = len(self.geom_node_paths)
         if material_count > self.material_count:
             print('Setting material_count to', material_count)
             self.material_count = material_count
             self.buffer_materials.setup_buffer_texture(
-                self.material_count * 4,
+                self.material_count * texel_count,
                 p3d.Texture.T_float,
                 p3d.Texture.F_rgba32,
                 p3d.GeomEnums.UH_dynamic
             )
-        material_ram_image = (ctypes.c_float * (material_count * 4 * 4))()
-        for i, material in enumerate(materials):
-            image_idx = i * 16
+        material_ram_image = (ctypes.c_float * (material_count * texel_count * 4))()
+        for i, path in enumerate(self.geom_node_paths):
+            path.set_shader_input('material_index', i)
+            material = path.find_all_materials()[0]
+            textures = path.find_all_textures()
+            image_idx = i * texel_count * 4
 
             ambient = material.get_ambient()
             material_ram_image[image_idx + 0] = ambient.x
@@ -72,9 +87,27 @@ class DataManager:
             material_ram_image[image_idx + 13] = specular.y
             material_ram_image[image_idx + 14] = specular.z
             material_ram_image[image_idx + 15] = material.get_shininess()
-        self.buffer_materials.set_ram_image(material_ram_image)
 
-        self.material_map = {material.name: i for i, material in enumerate(materials)}
+            material_ram_image[image_idx + 16] = 0
+            material_ram_image[image_idx + 17] = 0
+            material_ram_image[image_idx + 18] = 0
+            material_ram_image[image_idx + 19] = 0
+
+            for texture in list(textures)[:2]:
+                name = self.get_texture_id(texture)
+                if name not in self.bindless_handles:
+                    try:
+                        handle = gl_bindless_texture.glGetTextureHandleARB(name)
+                        gl_bindless_texture.glMakeTextureHandleResidentARB(handle)
+                        self.bindless_handles[name] = handle
+                        print('Successfully generated handle:', handle)
+                    except GLError:
+                        print('Unable to create handle')
+                        continue
+                handle = self.bindless_handles[name]
+                material_ram_image[image_idx + 16] = int_bits_to_float(handle)
+
+        self.buffer_materials.set_ram_image(material_ram_image)
 
     def update_primitives(self):
         self.geom_node_paths = list(self.np_scene_root.find_all_matches('**/+GeomNode'))
@@ -94,5 +127,5 @@ class DataManager:
             self.buffer_meshes.resize(self.primitive_count * 3 * self.vertex_stride)
 
     def update(self):
-        self.update_materials()
         self.update_primitives()
+        self.update_materials()

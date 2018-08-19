@@ -166,12 +166,4 @@ class StageGather:
             self.camera = None
 
     def update(self):
-        # Set shader inputs
-        material_map = self.data.material_map
-        for nodepath in self.data.geom_node_paths:
-            try:
-                material_index = material_map[nodepath.findMaterial('*').name]
-            except AttributeError:
-                print('{} has no material'.format(nodepath.getName()))
-                material_index = 0
-            nodepath.set_shader_input('material_index', material_index)
+        pass

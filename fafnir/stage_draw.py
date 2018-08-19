@@ -18,8 +18,7 @@ class StageDraw:
         )
 
     def cb_resolve_intersections(self, cbdata):
-        instance_count = len(self.data.material_map.keys())
-        gl.glDrawArraysInstanced(gl.GL_TRIANGLE_STRIP, 0, 4, instance_count)
+        gl.glDrawArraysInstanced(gl.GL_TRIANGLE_STRIP, 0, 4, self.data.material_count)
         cbdata.upcall()
 
     def enable(self):

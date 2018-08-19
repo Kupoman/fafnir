@@ -12,7 +12,7 @@ out VertexData {
 
 void main()
 {
-    int vertexStride = 2;
+    int vertexStride = 4;
     int vertexIdBase = int(gl_VertexID * vertexStride);
     vec4 data = texelFetch(buffer_meshes, vertexIdBase + 0);
     vec4 vertex = vec4(data.xyz, 1.0);
