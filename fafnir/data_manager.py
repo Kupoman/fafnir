@@ -36,6 +36,10 @@ class DataManager:
         self.mask_rtt = 1
         self.mask_draw = 2
 
+        self.default_material = p3d.Material('fafnir_default')
+
+        self.camera = self.find_camera()
+
         self.update()
 
     def get_texture_id(self, texture):
@@ -60,8 +64,12 @@ class DataManager:
         material_ram_image = (ctypes.c_float * (material_count * texel_count * 4))()
         for i, path in enumerate(self.geom_node_paths):
             path.set_shader_input('material_index', i)
-            material = path.find_all_materials()[0]
             textures = path.find_all_textures()
+            materials = path.find_all_materials()
+            if materials:
+                material = materials[0]
+            else:
+                material = self.default_material
             image_idx = i * texel_count * 4
 
             ambient = material.get_ambient()
