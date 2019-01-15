@@ -110,7 +110,7 @@ class DataManager:
                         self.bindless_handles[name] = handle
                         print('Successfully generated handle:', handle)
                     except GLError:
-                        print('Unable to create handle')
+                        # print('Unable to create handle')
                         continue
                 handle = self.bindless_handles[name]
                 material_ram_image[image_idx + 16] = int_bits_to_float(handle)
@@ -133,6 +133,21 @@ class DataManager:
             print('Setting primitive_count to', primitive_count)
             self.primitive_count = primitive_count
             self.buffer_meshes.resize(self.primitive_count * 3 * self.vertex_stride)
+
+    def find_camera(self):
+        cameras = self.np_scene_root.find_all_matches('**/+LensNode')
+
+        if not cameras:
+            cameras = self.np_render.find_all_matches('**/+LensNode')
+
+        if not cameras:
+            return None
+        return cameras[0].get_parent()
+
+    def sync_camera(self, render_camera):
+        if not self.camera:
+            return
+        render_camera.set_mat(self.np_render, self.camera.get_mat())
 
     def update(self):
         self.update_primitives()

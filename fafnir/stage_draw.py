@@ -64,4 +64,4 @@ class StageDraw:
             self.callback_np = None
 
     def update(self):
-        pass
+        self.data.sync_camera(self.camera)
