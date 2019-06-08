@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "panda3d-fafnir"
+version = "0.1.0"
+license = "MIT"
+description = "A Panda3D utility for deferred ray tracing"
+authors = ["Daniel Stokes <kupomail@gmail.com>"]
+readme = "README.md"
+homepage = "https://github.com/Kupoman/fafnir"
+repository = "https://github.com/Kupoman/fafnir"
+documentation = "https://github.com/Kupoman/fafnir"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License"
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+panda3d = "^1.10"
+pyopengl = "^3.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.0"
+pylint = "^2.2"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
