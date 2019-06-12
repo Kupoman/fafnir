@@ -1,5 +1,5 @@
 test:
-	poetry run python -m pytest --color=yes
+	poetry run python -m pytest --color=yes --cov=fafnir
 
 lint:
 	poetry run pylint fafnir
