@@ -9,6 +9,7 @@ def pipe():
     p3d.load_prc_file_data(
         '',
         'gl-version 3 3\n'
+        'textures-power-2 false\n'
     )
     return p3d.GraphicsPipeSelection.get_global_ptr().make_default_pipe()
 
@@ -23,7 +24,7 @@ def window(pipe, engine):
     fbprops = p3d.FrameBufferProperties()
     fbprops.set_rgba_bits(8, 8, 8, 0)
     fbprops.set_depth_bits(24)
-    winprops = p3d.WindowProperties.size(1, 1)
+    winprops = p3d.WindowProperties.size(4, 3)
     flags = p3d.GraphicsPipe.BF_refuse_window
     return engine.make_output(
         pipe,
@@ -38,3 +39,12 @@ def window(pipe, engine):
 @pytest.fixture
 def gsg(window):
     return window.get_gsg()
+
+
+@pytest.fixture
+def graphics_context(pipe, engine, window):
+    return {
+        'pipe': pipe,
+        'engine': engine,
+        'window': window,
+    }
