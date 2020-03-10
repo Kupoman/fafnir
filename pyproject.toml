@@ -17,7 +17,7 @@ classifiers = [
 python = "^3.7"
 panda3d = "^1.10"
 pyopengl = "^3.1"
-panda3d-render-pass = { git = "https://github.com/kupoman/panda3d-render-pass", branch = "2-multiple-render-targets" }
+panda3d-render-pass = { git = "https://github.com/kupoman/panda3d-render-pass", branch = "master" }
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
