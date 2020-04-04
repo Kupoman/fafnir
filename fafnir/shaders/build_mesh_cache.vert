@@ -1,8 +1,9 @@
 #version 330
 #extension GL_ARB_enhanced_layouts : require
 
-uniform mat4 p3d_ModelViewMatrix;
+uniform mat4 p3d_ModelMatrix;
 uniform mat4 p3d_ProjectionMatrix;
+uniform mat4 p3d_ModelViewProjectionMatrix;
 uniform mat3 p3d_NormalMatrix;
 
 uniform int material_index;
@@ -20,9 +21,7 @@ out VertexData {
 
 void main()
 {
-    vertex = p3d_ModelViewMatrix * p3d_Vertex;
-    vertex.w = material_index;
-    normal = normalize(p3d_NormalMatrix * p3d_Normal);
+    vertex = p3d_ModelMatrix * p3d_Vertex;
+    normal = normalize(mat3(p3d_ModelMatrix) * p3d_Normal);
     texcoord0 = p3d_MultiTexCoord0;
-    gl_Position = p3d_ProjectionMatrix * vertex;
 }

@@ -32,5 +32,4 @@ def test_buffer_id(gsg, engine):
     buffer1 = GpuBufferRGBA32F('one', 1, gsg)
     engine.render_frame()
 
-    assert buffer0.get_buffer_id() == 1
-    assert buffer1.get_buffer_id() == 2
+    assert abs(buffer0.get_buffer_id() - buffer1.get_buffer_id()) == 1
