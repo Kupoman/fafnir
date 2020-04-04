@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "panda3d-fafnir"
+name = "fafnir"
 version = "0.1.0"
 license = "MIT"
 description = "A Panda3D utility for deferred ray tracing"
