@@ -12,7 +12,7 @@ SHADER_DIR = os.path.join(os.path.dirname(__file__), 'shaders', '')
 VERTEX_STRIDE = 4
 
 
-class GeometryPass:
+class GeometryPass(RenderPass):
     def __init__(self, name, graphics_context, scene=None, camera=None):
         self.name = name
         self.graphics_context = graphics_context
@@ -28,7 +28,7 @@ class GeometryPass:
 
         fb_props = p3d.FrameBufferProperties()
         fb_props.set_rgb_color(False)
-        self.render_pass = RenderPass(
+        super().__init__(
             self.name,
             **graphics_context,
             frame_buffer_properties=fb_props,

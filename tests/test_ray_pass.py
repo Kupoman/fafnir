@@ -25,7 +25,7 @@ def test_screen_rays(graphics_context, gsg):
     ray_pass = RayPass('test', graphics_context)
     graphics_context['engine'].render_frame()
 
-    texture = ray_pass.get_rays()
+    texture = ray_pass.outputs[0]
 
     # Check data type
     assert texture.get_component_type() == p3d.Texture.T_float
@@ -39,7 +39,7 @@ def test_screen_rays(graphics_context, gsg):
     assert_image(
         graphics_context,
         gsg,
-        texture,
+        ray_pass.outputs[0],
         [
             -0.17863279581069946, 1.0, -0.2009618878364563, 1.0,
             -0.17863279581069946, 1.0, -0.0669872984290123, 1.0,
@@ -61,7 +61,7 @@ def test_screen_rays(graphics_context, gsg):
     assert_image(
         graphics_context,
         gsg,
-        ray_pass.render_pass.outputs[1],
+        ray_pass.outputs[1],
         [
             -0.1725059300661087, 0.9657012820243835, -0.19406916201114655, 1.0,
             -0.1754681020975113, 0.9822837114334106, -0.06580053269863129, 1.0,
