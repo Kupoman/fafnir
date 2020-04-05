@@ -1,7 +1,19 @@
 #version 330
-#extension GL_ARB_bindless_texture : enable
 
-flat in int instance_id;
+//#extension GL_ARB_bindless_texture : enable
+//sampler2D p3d_Texture0;
+//flat in int instance_id;
+//void unpack_texture() {
+//    vec4 texture_data = texelFetch(buffer_materials, material_index + 4);
+//    uvec2 handle;
+//    handle.x = uint(floatBitsToInt(texture_data.x));
+//    handle.y = uint(floatBitsToInt(texture_data.y));
+//    p3d_Texture0 = sampler2D(handle);
+//}
+
+uniform sampler2D p3d_Texture0;
+uniform int instance_id;
+void unpack_texture() {}
 
 uniform samplerBuffer buffer_meshes;
 uniform samplerBuffer buffer_materials;
@@ -9,7 +21,6 @@ uniform samplerBuffer buffer_materials;
 vec4 p3d_Vertex = vec4(0.0);
 vec3 p3d_Normal = vec3(0.0);
 vec2 p3d_MultiTexCoord0 = vec2(0.0);
-sampler2D p3d_Texture0;
 
 struct {
     vec4 ambient;
@@ -47,14 +58,13 @@ vec3 bary_interp_vec3(vec3 a, vec3 b, vec3 c, vec3 uvw)
 
 void fafnir_unpack_vertex()
 {
-
     ivec2 texel_pos = ivec2(gl_FragCoord.xy);
     vec4 data = texelFetch(texture_intersections, texel_pos, 0);
 
     int materialid = int(data.w - 1.0);
-    if (instance_id != materialid) {
-        discard;
-    }
+    //if (instance_id != materialid) {
+    //    discard;
+    //}
 
     vec3 uvw = vec3(data.xy, 1.0 - data.x - data.y);
 
@@ -69,7 +79,6 @@ void fafnir_unpack_vertex()
     vec3 v2 = texelFetch(buffer_meshes, vertexIdBase + 8).xyz;
     vec3 n2 = texelFetch(buffer_meshes, vertexIdBase + 9).xyz;
     vec2 t2 = texelFetch(buffer_meshes, vertexIdBase + 10).xy;
-
 
     p3d_Vertex = vec4(bary_interp_vec3(v0, v1, v2, uvw), 1.0);
     p3d_Normal = bary_interp_vec3(n0, n1, n2, uvw);
@@ -87,11 +96,7 @@ void fafnir_unpack_material()
     p3d_Material.specular = specular_data.xyz;
     p3d_Material.shininess = specular_data.w;
 
-    vec4 texture_data = texelFetch(buffer_materials, material_index + 4);
-    uvec2 handle;
-    handle.x = uint(floatBitsToInt(texture_data.x));
-    handle.y = uint(floatBitsToInt(texture_data.y));
-    p3d_Texture0 = sampler2D(handle);
+    unpack_texture();
 }
 
 void main()
@@ -116,4 +121,5 @@ void main()
 
     frag_out.rgb = diffuse + specular;
     frag_out.w = 1.0;
+    frag_out.rgb = vec3(NoL);
 }
