@@ -34,25 +34,12 @@ def test_xfb_activity(graphics_context):
     assert flags['active_during_render']
 
 
-def test_prim_count(graphics_context, half_screen_quad):
-    geom_pass = GeometryPass(
-        'test',
-        graphics_context,
-        scene=half_screen_quad,
-    )
-
-    assert geom_pass.count_primitives() == 2
-
-
 def test_buffer_resize(graphics_context, half_screen_quad):
     geom_pass = GeometryPass(
         'test',
         graphics_context,
         scene=half_screen_quad,
     )
-
-    assert geom_pass.update_mesh_buffer_size()
-    assert not geom_pass.update_mesh_buffer_size()
 
     graphics_context['engine'].render_frame()
     view = geom_pass.extract_mesh_cache()

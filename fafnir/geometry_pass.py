@@ -56,7 +56,7 @@ class GeometryPass(RenderPass):
             return attach_new_callback('draw_callback', nodepath, name, callback)
 
         def update(callback_data):
-            self.update_mesh_buffer_size()
+            self._iterate_geometry()
             callback_data.upcall()
 
         def begin(callback_data):
@@ -104,16 +104,14 @@ class GeometryPass(RenderPass):
 
         self.root_np.set_shader_input('material_index', 0)
 
-    def update_mesh_buffer_size(self):
-        primitive_count = self.count_primitives()
+    def _update_mesh_buffer_size(self, primitive_count):
         if primitive_count <= self.primitive_count:
-            return False
+            return
 
         self.primitive_count = primitive_count
         self.mesh_buffer.resize(self.primitive_count * 3 * VERTEX_STRIDE)
-        return True
 
-    def count_primitives(self):
+    def _iterate_geometry(self):
         geom_node_paths = list(self.root_np.find_all_matches('**/+GeomNode'))
 
         primitive_count = 0
@@ -125,7 +123,7 @@ class GeometryPass(RenderPass):
                         for primitive in geom.get_primitives():
                             primitive_count += primitive.get_num_faces()
 
-        return primitive_count
+        self._update_mesh_buffer_size(primitive_count)
 
     def get_mesh_cache(self):
         return self.mesh_buffer.get_texture()
