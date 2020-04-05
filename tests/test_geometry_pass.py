@@ -34,7 +34,7 @@ def test_xfb_activity(graphics_context):
     assert flags['active_during_render']
 
 
-def test_buffer_resize(graphics_context, half_screen_quad):
+def test_buffer_generation(graphics_context, half_screen_quad):
     geom_pass = GeometryPass(
         'test',
         graphics_context,
@@ -44,6 +44,9 @@ def test_buffer_resize(graphics_context, half_screen_quad):
     graphics_context['engine'].render_frame()
     view = geom_pass.extract_mesh_cache()
     assert len(view) == 96
+
+    view = geom_pass.extract_material_cache()
+    assert len(view) == 20
 
 
 def test_scene(graphics_context, half_screen_quad, camera):
@@ -55,33 +58,34 @@ def test_scene(graphics_context, half_screen_quad, camera):
     )
     graphics_context['engine'].render_frame()
     view = list(geom_pass.extract_mesh_cache())
+    print(view)
     assert view == pytest.approx([
-        0, 5, -10, 1,
+        0, 5, -10, 0,
         0, 1, 0, 0,
         0.0, 0.2, 0, 0,
         0, 0, 0, 0,
 
-        0, 5, 10, 1,
+        0, 5, 10, 0,
         0, 1, 0, 0,
         0.0, 0.1, 0, 0,
         0, 0, 0, 0,
 
-        -10, 5, 10, 1,
+        -10, 5, 10, 0,
         0, 1, 0, 0,
         0.0, 0.0, 0, 0,
         0, 0, 0, 0,
 
-        -10, 5, 10, 1,
+        -10, 5, 10, 0,
         0, 1, 0, 0,
         0.0, 0.0, 0, 0,
         0, 0, 0, 0,
 
-        -10, 5, -10, 1,
+        -10, 5, -10, 0,
         0, 1, 0, 0,
         0.0, 0.3, 0, 0,
         0, 0, 0, 0,
 
-        0, 5, -10, 1,
+        0, 5, -10, 0,
         0, 1, 0, 0,
         0.0, 0.2, 0, 0,
         0, 0, 0, 0,
@@ -101,34 +105,54 @@ def test_scene_xform(graphics_context, half_screen_quad, camera):
     view = list(geom_pass.extract_mesh_cache())
     print(view)
     assert view == pytest.approx([
-        -5, 0, -10, 1,
+        -5, 0, -10, 0,
         -1, 0, 0, 0,
         0.0, 0.2, 0, 0,
         0, 0, 0, 0,
 
-        -5, 0, 10, 1,
+        -5, 0, 10, 0,
         -1, 0, 0, 0,
         0.0, 0.1, 0, 0,
         0, 0, 0, 0,
 
-        -5, -10, 10, 1,
+        -5, -10, 10, 0,
         -1, 0, 0, 0,
         0.0, 0.0, 0, 0,
         0, 0, 0, 0,
 
-        -5, -10, 10, 1,
+        -5, -10, 10, 0,
         -1, 0, 0, 0,
         0.0, 0.0, 0, 0,
         0, 0, 0, 0,
 
-        -5, -10, -10, 1,
+        -5, -10, -10, 0,
         -1, 0, 0, 0,
         0.0, 0.3, 0, 0,
         0, 0, 0, 0,
 
-        -5, 0, -10, 1,
+        -5, 0, -10, 0,
         -1, 0, 0, 0,
         0.0, 0.2, 0, 0,
         0, 0, 0, 0,
 
     ], abs=1.0e-5)
+
+def test_material(graphics_context, half_screen_quad):
+    geom_pass = GeometryPass(
+        'test',
+        graphics_context,
+        scene=half_screen_quad
+    )
+    graphics_context['engine'].render_frame()
+
+    records = geom_pass.material_records
+    assert len(records) == 1
+
+    record = records[0]
+
+    assert record.material
+    assert not record.texture
+
+    # view = list(geom_pass.extract_material_cache())
+    # print(view)
+    # assert False

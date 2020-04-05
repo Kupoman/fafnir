@@ -11,8 +11,8 @@
 //    p3d_Texture0 = sampler2D(handle);
 //}
 
-uniform sampler2D p3d_Texture0;
 uniform int instance_id;
+uniform sampler2D p3d_Texture0;
 void unpack_texture() {}
 
 uniform samplerBuffer buffer_meshes;
@@ -60,17 +60,18 @@ void fafnir_unpack_vertex()
 {
     ivec2 texel_pos = ivec2(gl_FragCoord.xy);
     vec4 data = texelFetch(texture_intersections, texel_pos, 0);
-
-    int materialid = int(data.w - 1.0);
-    //if (instance_id != materialid) {
-    //    discard;
-    //}
-
     vec3 uvw = vec3(data.xy, 1.0 - data.x - data.y);
 
     int vertexStride = 4;
     int vertexIdBase = int(data.z * 3 * vertexStride);
-    vec3 v0 = texelFetch(buffer_meshes, vertexIdBase + 0).xyz;
+    data = texelFetch(buffer_meshes, vertexIdBase + 0);
+
+    int materialid = int(data.w);
+    if (instance_id != materialid) {
+        discard;
+    }
+
+    vec3 v0 = data.xyz;
     vec3 n0 = texelFetch(buffer_meshes, vertexIdBase + 1).xyz;
     vec2 t0 = texelFetch(buffer_meshes, vertexIdBase + 2).xy;
     vec3 v1 = texelFetch(buffer_meshes, vertexIdBase + 4).xyz;
@@ -121,5 +122,6 @@ void main()
 
     frag_out.rgb = diffuse + specular;
     frag_out.w = 1.0;
-    frag_out.rgb = vec3(NoL);
+
+    frag_out.rgb = diffuse;
 }

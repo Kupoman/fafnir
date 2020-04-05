@@ -31,7 +31,9 @@ class Renderer:
             'fafnir',
             graphics_context,
             intersection_pass.outputs[0],
-            geometry_pass.mesh_buffer
+            geometry_pass.mesh_buffer,
+            geometry_pass.material_buffer,
+            geometry_pass.material_records
         )
 
         final_pass = resolve_pass

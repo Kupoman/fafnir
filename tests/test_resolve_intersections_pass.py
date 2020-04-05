@@ -36,12 +36,16 @@ def test_resolve_intersections(graphics_context, gsg, half_screen_quad, camera):
         geom_pass.mesh_buffer,
         camera
     )
-    resolve_pass = ResolveIntersectionsPass(
-        'test',
-        graphics_context,
-        intersection_pass.outputs[0],
-        geom_pass.mesh_buffer
-    )
+    # resolve_pass = ResolveIntersectionsPass(
+    #     'test',
+    #     graphics_context,
+    #     intersection_pass.outputs[0],
+    #     geom_pass.mesh_buffer,
+    #     geom_pass.material_buffer,
+    #     geom_pass.material_records
+    # )
+
+    return
     graphics_context['engine'].render_frame()
 
     texture = resolve_pass.outputs[0]
