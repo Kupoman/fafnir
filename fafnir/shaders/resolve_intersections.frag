@@ -122,6 +122,4 @@ void main()
 
     frag_out.rgb = diffuse + specular;
     frag_out.w = 1.0;
-
-    frag_out.rgb = diffuse;
 }

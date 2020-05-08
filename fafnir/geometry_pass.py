@@ -174,7 +174,7 @@ class GeometryPass(RenderPass):
         materials = nodepath.find_all_materials()
         material = materials[0] if materials else self._default_material
         textures = nodepath.find_all_textures()
-        texture = textures[0] if textures else None
+        texture = textures[-1] if textures else 0
         return MaterialRecord(material, texture)
 
     def _iterate_geometry(self):
