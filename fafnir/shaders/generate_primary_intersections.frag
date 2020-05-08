@@ -12,5 +12,5 @@ void main()
 {
     out_data.rg = barycoord.xy;
     out_data.b = gl_PrimitiveID;
-    out_data.a = material_index + 1.0;
+    out_data.a = 0.0;
 }
