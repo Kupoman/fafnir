@@ -1,5 +1,6 @@
 from .geometry_pass import GeometryPass
 from .primary_intersection_pass import PrimaryIntersectionPass
+from .depth_filter_pass import DepthFilterPass
 from .resolve_intersections_pass import ResolveIntersectionsPass
 
 
@@ -17,23 +18,29 @@ class Renderer:
         }
 
         geometry_pass = GeometryPass(
-            'fafnir',
+            'Fafnir Geometry Pass',
             graphics_context,
             scene=scene_root_np
         )
         intersection_pass = PrimaryIntersectionPass(
-            'fafnir',
+            'Fafnir Intersections Pass',
             graphics_context,
             geometry_pass.mesh_buffer,
             base.camera
         )
+        depth_filter_pass = DepthFilterPass(
+            'Fafnir Depth Filter Pass',
+            graphics_context,
+            intersection_pass.outputs[0]
+        )
         resolve_pass = ResolveIntersectionsPass(
-            'fafnir',
+            'Fafnir Resolve Intersections Pass',
             graphics_context,
             intersection_pass.outputs[0],
             geometry_pass.mesh_buffer,
             geometry_pass.material_buffer,
-            geometry_pass.material_records
+            geometry_pass.material_records,
+            depth_filter_pass
         )
 
         final_pass = resolve_pass

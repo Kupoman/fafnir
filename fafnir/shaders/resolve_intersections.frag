@@ -64,14 +64,8 @@ void fafnir_unpack_vertex()
 
     int vertexStride = 4;
     int vertexIdBase = int(data.z * 3 * vertexStride);
-    data = texelFetch(buffer_meshes, vertexIdBase + 0);
 
-    int materialid = int(data.w);
-    if (instance_id != materialid) {
-        discard;
-    }
-
-    vec3 v0 = data.xyz;
+    vec3 v0 = texelFetch(buffer_meshes, vertexIdBase + 0).xyz;
     vec3 n0 = texelFetch(buffer_meshes, vertexIdBase + 1).xyz;
     vec2 t0 = texelFetch(buffer_meshes, vertexIdBase + 2).xy;
     vec3 v1 = texelFetch(buffer_meshes, vertexIdBase + 4).xyz;
