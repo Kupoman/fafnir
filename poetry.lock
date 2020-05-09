@@ -121,6 +121,28 @@ version = "1.10.5"
 
 [[package]]
 category = "main"
+description = "A tool to convert Blender blend files to Panda3D BAM files"
+name = "panda3d-blend2bam"
+optional = false
+python-versions = "*"
+version = "0.11"
+
+[package.dependencies]
+panda3d = "*"
+
+[[package]]
+category = "main"
+description = "A Python package to help bootstrap and manage Panda3D applications"
+name = "panda3d-pman"
+optional = false
+python-versions = ">=3.6"
+version = "0.11"
+
+[package.dependencies]
+panda3d-blend2bam = ">=0.5.1"
+
+[[package]]
+category = "main"
 description = ""
 name = "panda3d-render-pass"
 optional = false
@@ -134,6 +156,7 @@ panda3d = "^1.10"
 reference = "66e95ba9dcc4bf1802469ce26391e9a335e71bf9"
 type = "git"
 url = "https://github.com/kupoman/panda3d-render-pass"
+
 [[package]]
 category = "dev"
 description = "plugin and hook calling mechanisms for python"
@@ -252,7 +275,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "a9085ceaa32c5c66f40bfd90c988bd03bab743fbd719e54add94b0f7ce62b7b9"
+content-hash = "9cc50b550dba4c3dd051c2adca562ed43f44f0c20b40842711bcdab3381eddc9"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -382,6 +405,14 @@ panda3d = [
     {file = "panda3d-1.10.5-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:cf386c8bf2cc1dbb87a8fcde2e14ba4374934aa13edcd966c3aa6c64facb8884"},
     {file = "panda3d-1.10.5-cp38-cp38-win32.whl", hash = "sha256:f7bb92ba22c330f5dfa6374079c0b744415b8d53ece58bedef1b91e42f8f1aca"},
     {file = "panda3d-1.10.5-cp38-cp38-win_amd64.whl", hash = "sha256:953cfb53b7f8a11c73f58077456dc7fddb66725e9c8656eb572dcf0334a5d11a"},
+]
+panda3d-blend2bam = [
+    {file = "panda3d-blend2bam-0.11.tar.gz", hash = "sha256:09547ee713b98138b0770d8f27a4536f73892c799955c1306b13f0cd551b0a74"},
+    {file = "panda3d_blend2bam-0.11-py3-none-any.whl", hash = "sha256:961e26a808929f943233d4f7d19780ef0214ffe6d5f5e47054ed6d515bd1e1ee"},
+]
+panda3d-pman = [
+    {file = "panda3d-pman-0.11.tar.gz", hash = "sha256:691f285bf393a8874dd072564dbd7d7623cc574be3b85d3a02c5cece4c880fdf"},
+    {file = "panda3d_pman-0.11-py3-none-any.whl", hash = "sha256:da49aa48cce05b919efa25db9fd59c73bb4ec5859f5e9b4a0d2406e0cc404a36"},
 ]
 panda3d-render-pass = []
 pluggy = [

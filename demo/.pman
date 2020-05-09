@@ -1,0 +1,11 @@
+[build]
+ignore_patterns = [ "*.blend1", "*.blend2",]
+converters = [ "blend2bam",]
+
+[run]
+auto_build = true
+auto_save = true
+
+[general]
+name = "Game"
+render_plugin = ""

@@ -102,3 +102,8 @@ ENV/
 
 # vim swap files
 *.swp
+
+# demo build/user files
+demo/.built_assets
+demo/.pman.user
+demo/assets/*.blend1
