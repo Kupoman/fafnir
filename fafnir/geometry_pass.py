@@ -6,6 +6,8 @@ from OpenGL import GL as gl
 import panda3d.core as p3d
 from panda3d_render_pass import RenderPass
 
+import lionrender
+
 from .gpu_buffer import GpuBufferRGBA32F
 
 
@@ -23,12 +25,12 @@ class GeometryPass(RenderPass):
         self.name = name
         self.graphics_context = graphics_context
         self.root_np = p3d.NodePath(name + '_root')
-        self.xfb_active = False
         self.mesh_buffer = GpuBufferRGBA32F(
             'mesh_buffer',
             0,
             graphics_context['window'].get_gsg()
         )
+        self.xfb = lionrender.TransformFeedbackBuffer('geometry_xfb', self.mesh_buffer)
         self.material_buffer = GpuBufferRGBA32F(
             'material_buffer',
             0,
@@ -39,7 +41,7 @@ class GeometryPass(RenderPass):
         self.material_count = 0
         self._default_material = p3d.Material('fafnir_default')
 
-        self._init_xfb(scene)
+        self._init_xfb()
 
         fb_props = p3d.FrameBufferProperties()
         fb_props.set_rgb_color(False)
@@ -57,9 +59,10 @@ class GeometryPass(RenderPass):
             camera=camera,
         )
 
+        scene.instance_to(self.root_np)
         self._root.set_shader_input('object_id', 0)
 
-    def _init_xfb(self, scene):
+    def _init_xfb(self):
         def attach_new_callback(prop, nodepath, name, callback):
             cb_node = p3d.CallbackNode(name)
             setattr(cb_node, prop, p3d.PythonCallbackObject(callback))
@@ -69,63 +72,18 @@ class GeometryPass(RenderPass):
         def attach_new_cull_callback(nodepath, name, callback):
             return attach_new_callback('cull_callback', nodepath, name, callback)
 
-        def attach_new_draw_callback(nodepath, name, callback):
-            return attach_new_callback('draw_callback', nodepath, name, callback)
-
         def update(callback_data):
             self._iterate_geometry()
             callback_data.upcall()
 
-        def begin(callback_data):
-            buffer_id = self.mesh_buffer.get_buffer_id()
-            if buffer_id and not self.xfb_active:
-                gl.glEnable(gl.GL_RASTERIZER_DISCARD)
-                gl.glBindBufferBase(gl.GL_TRANSFORM_FEEDBACK_BUFFER, 0, buffer_id)
-                gl.glBeginTransformFeedback(gl.GL_TRIANGLES)
-                self.xfb_active = True
-            callback_data.upcall()
-
-        def end(callback_data):
-            if self.xfb_active:
-                gl.glEndTransformFeedback()
-                gl.glBindBufferBase(gl.GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0)
-                gl.glDisable(gl.GL_RASTERIZER_DISCARD)
-                self.xfb_active = False
-            callback_data.upcall()
-
-        bin_manager = p3d.CullBinManager.get_global_ptr()
-        bin_manager.add_bin('xfb_begin', p3d.CullBinManager.BT_fixed, 5)
-        bin_manager.add_bin('xfb_end', p3d.CullBinManager.BT_fixed, 55)
-
-        path = attach_new_cull_callback(
+        attach_new_cull_callback(
             self.root_np,
             self.name + '_xfb_resize',
             update
         )
-        path.set_bin('xfb_begin', 10)
-
-        path = attach_new_draw_callback(
-            self.root_np,
-            self.name + '_xfb_begin',
-            begin
-        )
-        path.set_bin('xfb_begin', 11)
-
-        scene.instance_to(self.root_np)
-        path = attach_new_draw_callback(
-            self.root_np,
-            self.name + '_xfb_end',
-            end
-        )
-        path.set_bin('xfb_end', 10)
 
         self.root_np.set_shader_input('material_index', 0)
-
-    def _update_mesh_buffer_size(self, primitive_count):
-        if primitive_count <= self.primitive_count:
-            return
-        self.primitive_count = primitive_count
-        self.mesh_buffer.resize(self.primitive_count * 3 * VERTEX_STRIDE)
+        self.xfb.attach(self.root_np)
 
     def _update_material_buffer_size(self, material_count):
         if material_count <= self.material_count:
@@ -134,6 +92,9 @@ class GeometryPass(RenderPass):
         self.material_buffer.resize(self.material_count * MATERIAL_STRIDE)
 
     def _update_material_buffer(self):
+        if len(self.material_records) == 0:
+            return
+
         material_ram_image = (ctypes.c_float * (len(self.material_records) * MATERIAL_STRIDE * 4))()
         for i, record in enumerate(self.material_records):
             material = record.material
@@ -180,7 +141,6 @@ class GeometryPass(RenderPass):
     def _iterate_geometry(self):
         geom_node_paths = list(self.root_np.find_all_matches('**/+GeomNode'))
 
-        primitive_count = 0
         material_count = 0
         self.material_records.clear()
 
@@ -188,13 +148,6 @@ class GeometryPass(RenderPass):
             nodepath.set_shader_input('object_id', material_count)
             self.material_records.append(self._generate_material_record(nodepath))
             material_count += 1
-            for node in nodepath.get_nodes():
-                if isinstance(node, p3d.GeomNode):
-                    for geom in node.get_geoms():
-                        for primitive in geom.get_primitives():
-                            primitive_count += primitive.get_num_faces()
-
-        self._update_mesh_buffer_size(primitive_count)
 
         self._update_material_buffer_size(material_count)
         self._update_material_buffer()
