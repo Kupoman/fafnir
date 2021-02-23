@@ -25,6 +25,7 @@ class Renderer:
         intersection_pass = PrimaryIntersectionPass(
             'Fafnir Intersections Pass',
             graphics_context,
+            geometry_pass.xfb,
             geometry_pass.mesh_buffer,
             base.camera
         )
